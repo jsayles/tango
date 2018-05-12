@@ -48,17 +48,20 @@ class LED:
         self.pin.value = not self.pin.value
 
 
+class Button:
+
+    def __init__(self, pin):
+        self.pin = DigitalInOut(pin)
+        self.pin.direction = Direction.INPUT
+        self.pin.pull = Pull.UP
+
+    def pressed(self):
+        # False on the pin == Pressed
+        return not self.pin.value
+
+
 led = LED(board.D13)
-
-button1 = DigitalInOut(board.D5)
-button1.direction = Direction.INPUT
-button1.pull = Pull.UP
-
-button2 = DigitalInOut(board.D0)
-button2.direction = Direction.INPUT
-button2.pull = Pull.UP
-
-i2c = I2C(board.SCL, board.SDA)
-sensor = BNO055(i2c)
-
 pixel = Pixel(board.NEOPIXEL, 42)
+button1 = Button(board.D5)
+button2 = Button(board.D0)
+sensor = BNO055(I2C(board.SCL, board.SDA))

@@ -51,24 +51,27 @@ try:
             #print("Cycle: %d, Loop#: %d" % (cycle_number, loop_number))
 
             if recording_ts > 0:
-                print("recording_ts=%s" % recording_ts)
+                led.toggle()
                 record()
 
             last_loop_ts = cycle_ts
 
         # Button1 press
-        if not button1.value:
+        if button1.pressed():
+            # print("Button1 Pressed!")
             if recording_ts == 0:
                 # Start recording
                 recording_ts = time.monotonic()
                 pixel.green()
             elif time.monotonic() - recording_ts > 1:
                 # Stop recording
-                stop()
                 time.sleep(2)
+                stop()
+                recording_ts = 0
 
         # Button2 press
-        if not button2.value:
+        if button2.pressed():
+            # print("Button2 Pressed!")
             stop()
             time.sleep(1)
             start()
