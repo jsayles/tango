@@ -56,22 +56,22 @@ try:
 
             last_loop_ts = cycle_ts
 
-        # # Button1 press
-        # if not button1.value:
-        #     if recording_ts == 0:
-        #         # Start recording
-        #         recording_ts = time.monotonic()
-        #         pixel.green()
-        #     elif time.monotonic() - recording_ts > 1:
-        #         # Stop recording
-        #         stop()
-        #         time.sleep(2)
-        #
-        # # Button2 press
-        # if not button2.value:
-        #     stop()
-        #     time.sleep(1)
-        #     start()
+        # Button1 press
+        if not button1.value:
+            if recording_ts == 0:
+                # Start recording
+                recording_ts = time.monotonic()
+                pixel.green()
+            elif time.monotonic() - recording_ts > 1:
+                # Stop recording
+                stop()
+                time.sleep(2)
+
+        # Button2 press
+        if not button2.value:
+            stop()
+            time.sleep(1)
+            start()
 except KeyboardInterrupt:
     stop()
 
