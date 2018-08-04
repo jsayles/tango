@@ -7,20 +7,20 @@
 
 // Hardware
 #define PIXEL_PIN       8
-#define BUTTON1_PIN     0
-#define BUTTON2_PIN     5
+#define BUTTON1_PIN     5
+#define BUTTON2_PIN     0
 #define LED_PIN         13
 
 // Preferences
 #define PIXEL_BRIGTNESS 42
-#define INTERVAL_MS     100
+#define INTERVAL_MS     150
 
 // States
 #define CALIBRATING     0
-#define STOPPED         1
+#define RUNNING         1
 #define TRACKING        2
 #define RECORDING       3
-
+#define STOPPED         4
 
 // Bosch BNO55 Sensor
 Adafruit_BNO055 bno = Adafruit_BNO055(55);
@@ -28,17 +28,12 @@ Adafruit_BNO055 bno = Adafruit_BNO055(55);
 // Adafruit NeoPixel LED
 Adafruit_NeoPixel pixel = Adafruit_NeoPixel(1, PIXEL_PIN, NEO_GRB + NEO_KHZ800);
 
-// System State
-uint8_t state = CALIBRATING;
-
-
+// State Variables
+uint8_t run_state = CALIBRATING;
+uint8_t button1_state = HIGH;
+uint8_t button2_state = HIGH;
 unsigned long previousMillis = 0;
 
-float starting_x_position = 0;
-float starting_y_position = 0;
-float starting_z_position = 0;
-
-int ledState = LOW; 
 
 /**************************************************************************/
 /*    BNO Sensor Methods                                                  */
@@ -78,53 +73,6 @@ void displaySensorStatus(void) {
   Serial.println(system_error, HEX);
   Serial.println("");
   delay(500);
-}
-
-void displaySensorOffsets(const adafruit_bno055_offsets_t &calibData) {
-    Serial.print("Accelerometer: ");
-    Serial.print(calibData.accel_offset_x); Serial.print(" ");
-    Serial.print(calibData.accel_offset_y); Serial.print(" ");
-    Serial.print(calibData.accel_offset_z); Serial.print(" ");
-
-    Serial.print("\nGyro: ");
-    Serial.print(calibData.gyro_offset_x); Serial.print(" ");
-    Serial.print(calibData.gyro_offset_y); Serial.print(" ");
-    Serial.print(calibData.gyro_offset_z); Serial.print(" ");
-
-    Serial.print("\nMag: ");
-    Serial.print(calibData.mag_offset_x); Serial.print(" ");
-    Serial.print(calibData.mag_offset_y); Serial.print(" ");
-    Serial.print(calibData.mag_offset_z); Serial.print(" ");
-
-    Serial.print("\nAccel Radius: ");
-    Serial.print(calibData.accel_radius);
-
-    Serial.print("\nMag Radius: ");
-    Serial.print(calibData.mag_radius);
-}
-
-// Save calibration data
-void writeCalibrationData(void) {
-  Serial.println("\nFully calibrated!");
-      Serial.println("--------------------------------");
-      Serial.println("Calibration Results: ");
-      adafruit_bno055_offsets_t newCalib;
-      bno.getSensorOffsets(newCalib);
-      displaySensorOffsets(newCalib);
-  
-      Serial.println("\n\nStoring calibration data to EEPROM...");
-  
-      eeAddress = 0;
-      bno.getSensor(&sensor);
-      bnoID = sensor.sensor_id;
-  
-      EEPROM.put(eeAddress, bnoID);
-  
-      eeAddress += sizeof(long);
-      EEPROM.put(eeAddress, newCalib);
-      Serial.println("Data stored to EEPROM.");
-  
-      Serial.println("\n--------------------------------\n");
 }
 
 /**************************************************************************/
@@ -169,52 +117,47 @@ void pixel_off(void) {
 
 
 /**************************************************************************/
-/*    Button Methods                                                      */
-/**************************************************************************/
-
-void button1_press(void) {
-  digitalWrite(LED_PIN, HIGH);
-  if (bno.isFullyCalibrated()) {
-    Serial.println("Switching to TRACKING");
-    state = TRACKING;
-    pixel_white();
-    sensors_event_t event;
-    bno.getEvent(&event);
-    starting_x_position = event.orientation.x;
-    starting_y_position = event.orientation.y;
-    starting_z_position = event.orientation.z;
-  }
-  delay(1000);
-}
-
-void button2_press(void) {
-  digitalWrite(LED_PIN, LOW);  
-  if (state == TRACKING) {
-    Serial.println("Switching to RECORDING");
-    state == RECORDING;
-  } else if (state == RECORDING) {
-    Serial.println("Switching to STOPPED");
-    state == STOPPED;
-  }
-  delay(1000);
-}
-
-
-/**************************************************************************/
 /*    State Methods                                                       */
-/*                                                                        */
 /**************************************************************************/
+
+void stateToRunning(void) {
+  run_state = RUNNING;
+  pixel_green();
+}
+
+void stateToTracking(void) {
+  run_state = TRACKING;
+  pixel_white();
+}
+
+void stateToRecording(void) {
+  run_state = RECORDING;
+  pixel_blue();
+}
 
 void calibrate(void) {
+  // Stop calibrating when we are finished
+  if (bno.isFullyCalibrated()) {
+    Serial.println("Sensor Fully Calibrated!");
+    if (run_state == CALIBRATING) {
+      stateToRunning();
+    }
+    // Exit now if we are already calibrated
+    return;
+  } else {
+    pixel_red();
+  }
+  
   // There are four calibration values (0..3) 
   // Any sensor data reporting 0 should be ignored
   // 3 means 'fully calibrated" 
+  // The data should be ignored until the system calibration is > 0
   uint8_t sys, gyro, accel, mag;
   sys = gyro = accel = mag = 0;
   bno.getCalibration(&sys, &gyro, &accel, &mag);
 
   // Display the individual values
-  Serial.print("CALIBRATING:  System:");
+  Serial.print("System:");
   Serial.print(sys, DEC);
   Serial.print(" Gyroscope:");
   Serial.print(gyro, DEC);
@@ -222,39 +165,20 @@ void calibrate(void) {
   Serial.print(accel, DEC);
   Serial.print(" Magnetometer:");
   Serial.print(mag, DEC);
- 
-  // The data should be ignored until the system calibration is > 0
-  if (sys == 0 || gyro == 0 || accel == 0 || mag == 0) {
-    pixel_red();
-  } else if (sys >= 2 && gyro >=2 && accel >=2 && mag >=2) {
-    pixel_green();
-    Serial.print("  [READY]");
-  } else {
-    pixel_orange();
-  }
-
-  Serial.println(); 
 }
 
-void track(void) {
+void printRawData(void) {  
   sensors_event_t event;
   bno.getEvent(&event);
-  Serial.print("X: ");
-  Serial.print(event.orientation.x - starting_x_position, 4);
-  Serial.print("\tY: ");
-  Serial.print(event.orientation.y - starting_y_position, 4);
-  Serial.print("\tZ: ");
-  Serial.print(event.orientation.z - starting_z_position, 4); 
-  Serial.println(); 
-}
-
-void record(void) {
-  Serial.println("recording blah blah blah.....");
+  Serial.print(event.orientation.x);
+  Serial.print(",");
+  Serial.print(event.orientation.y);
+  Serial.print(",");
+  Serial.print(event.orientation.z); 
 }
 
 /**************************************************************************/
 /*    Arduino Methods                                                     */
-/*                                                                        */
 /**************************************************************************/
 
 void setup(void) {
@@ -275,42 +199,68 @@ void setup(void) {
   // This board has an external crystal
   bno.setExtCrystalUse(true);
 
-  // Setup our neopixel
+  // Start our neopixel
   pixel.begin();
 
-  // Setup our status LED
+  // Setup our status LED and our buttons
   pinMode(LED_PIN, OUTPUT);
-
-  // Setup our buttons
   pinMode(BUTTON1_PIN, INPUT_PULLUP);
-  attachInterrupt(digitalPinToInterrupt(BUTTON1_PIN), button1_press, CHANGE);
   pinMode(BUTTON2_PIN, INPUT_PULLUP);
-  attachInterrupt(digitalPinToInterrupt(BUTTON2_PIN), button2_press, CHANGE);
 }
 
 void loop(void) {
   unsigned long currentMillis = millis();
   if(currentMillis - previousMillis > INTERVAL_MS) {
     previousMillis = currentMillis;  
+    button1_state = digitalRead(BUTTON1_PIN);    
+    button2_state = digitalRead(BUTTON2_PIN);
+    
+    Serial.print("[");
+    Serial.print(currentMillis);
+    Serial.print("] ");
 
+    // Catch a CANCEL request on Button 2
+    if (button2_state == LOW) {
+      Serial.println("CANCEL");
+      stateToRunning();
+      return;
+    }
+    
     // Run the appropriate method for the state
-    switch(state) {
+    switch(run_state) {
       case CALIBRATING:
+        Serial.print("CALIBRATING | ");
         calibrate();
         break;
+      case RUNNING:
+        if (button1_state == LOW) {
+          stateToTracking();
+        } else {
+          Serial.print("RUNNING | ");
+        }
+        break;
       case TRACKING:
-        track();
+        if (button1_state == LOW) {
+          stateToRecording();
+        } else {
+          Serial.print("TRACKING | ");
+          printRawData();
+        }
         break;
       case RECORDING:
-        record();
+        if (button1_state == LOW) {
+          stateToRunning();
+        } else {
+          Serial.print("RECORDING | ");
+          printRawData();
+        }
         break;
     }
-
+    
     // Toggle our LED
-    if (ledState == LOW)
-      ledState = HIGH;
-    else
-      ledState = LOW;
-    digitalWrite(LED_PIN, ledState);
+    digitalWrite(LED_PIN, !digitalRead(LED_PIN));
+    
+    // End of the loop 
+    Serial.println(); 
   }
 }
