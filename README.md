@@ -1,25 +1,21 @@
 # Tango Sentio
 Tango Sentio is a 3D Scanner Glove using the Bosch BNO055 Absolute Orientation 9-DOF sensor.
 
-## The Name
-From Latin tango: touching, and sentio: seeing.  No we don't speak Latin but we have google and it sounded cool.
+The device straps to your middle finger and scans an object as you move your hand across it.  
+The scan is then imported in to Rhinoceros and multiple scans can be combined to create a
+full 3D model.
 
-## The Device
-The device straps to your middle finger
+Name derived from Latin tango: touching, and sentio: seeing.  
 
-### Base Hardware
+## Hardware
  - Sensor:  [Adafruit 9-DOF Absolute Orientation - BNO055](https://www.adafruit.com/product/2472)
  - Controller:  [Adafruit Feather M0 Express](https://www.adafruit.com/product/3403)
-### Tutorials
-  - Sensor:  https://learn.adafruit.com/adafruit-bno055-absolute-orientation-sensor
-  - Controller:  https://learn.adafruit.com/adafruit-feather-m0-express-designed-for-circuit-python-circuitpython
 
 ### Buttons
  - Button 1 is on the left and advances the state from RUNNING to TRACKING and RECORDING.
  - Button 2 is on the right and sets the state to RUNNING effectively canceling anything you were doing.
 
-
-## The Software
+## Software
 
 ### Client Program
 The client runs on the micro controller to handle button events and communicate
@@ -28,6 +24,9 @@ the sensor data via serial (115200).
 ### Server Program
 The "server" is a python script that runs on your computer and reads the incoming
 data from the client.
+
+### Import Program
+Eventually we'll also have a python script to import the data in to Rhino.
 
 ## Operating the device
 
@@ -61,6 +60,10 @@ configuration is in NDoF_FMC_On mode so the important part is at the end of the
 video.
 
 ## Tips, Tricks and Tools
+
+### Tutorials
+  - Sensor:  https://learn.adafruit.com/adafruit-bno055-absolute-orientation-sensor
+  - Controller:  https://learn.adafruit.com/adafruit-feather-m0-express-designed-for-circuit-python-circuitpython
 
 ### Watch Serial Console
  ```screen /dev/tty.usbmodem* 115200```
