@@ -80,6 +80,53 @@ void displaySensorStatus(void) {
   delay(500);
 }
 
+void displaySensorOffsets(const adafruit_bno055_offsets_t &calibData) {
+    Serial.print("Accelerometer: ");
+    Serial.print(calibData.accel_offset_x); Serial.print(" ");
+    Serial.print(calibData.accel_offset_y); Serial.print(" ");
+    Serial.print(calibData.accel_offset_z); Serial.print(" ");
+
+    Serial.print("\nGyro: ");
+    Serial.print(calibData.gyro_offset_x); Serial.print(" ");
+    Serial.print(calibData.gyro_offset_y); Serial.print(" ");
+    Serial.print(calibData.gyro_offset_z); Serial.print(" ");
+
+    Serial.print("\nMag: ");
+    Serial.print(calibData.mag_offset_x); Serial.print(" ");
+    Serial.print(calibData.mag_offset_y); Serial.print(" ");
+    Serial.print(calibData.mag_offset_z); Serial.print(" ");
+
+    Serial.print("\nAccel Radius: ");
+    Serial.print(calibData.accel_radius);
+
+    Serial.print("\nMag Radius: ");
+    Serial.print(calibData.mag_radius);
+}
+
+// Save calibration data
+void writeCalibrationData(void) {
+  Serial.println("\nFully calibrated!");
+      Serial.println("--------------------------------");
+      Serial.println("Calibration Results: ");
+      adafruit_bno055_offsets_t newCalib;
+      bno.getSensorOffsets(newCalib);
+      displaySensorOffsets(newCalib);
+  
+      Serial.println("\n\nStoring calibration data to EEPROM...");
+  
+      eeAddress = 0;
+      bno.getSensor(&sensor);
+      bnoID = sensor.sensor_id;
+  
+      EEPROM.put(eeAddress, bnoID);
+  
+      eeAddress += sizeof(long);
+      EEPROM.put(eeAddress, newCalib);
+      Serial.println("Data stored to EEPROM.");
+  
+      Serial.println("\n--------------------------------\n");
+}
+
 /**************************************************************************/
 /*    Pixel Methods                                                       */
 /*                                                                        */
@@ -166,18 +213,8 @@ void calibrate(void) {
   sys = gyro = accel = mag = 0;
   bno.getCalibration(&sys, &gyro, &accel, &mag);
 
-  // The data should be ignored until the system calibration is > 0
-  if (sys == 0 || gyro == 0 || accel == 0 || mag == 0) {
-    Serial.print("! ");
-    pixel_red();
-  } else if (sys >= 2 && gyro >=2 && accel >=2 && mag >=2) {
-    pixel_green();
-  } else {
-    pixel_orange();
-  }
-
   // Display the individual values
-  Serial.print("System:");
+  Serial.print("CALIBRATING:  System:");
   Serial.print(sys, DEC);
   Serial.print(" Gyroscope:");
   Serial.print(gyro, DEC);
@@ -185,6 +222,17 @@ void calibrate(void) {
   Serial.print(accel, DEC);
   Serial.print(" Magnetometer:");
   Serial.print(mag, DEC);
+ 
+  // The data should be ignored until the system calibration is > 0
+  if (sys == 0 || gyro == 0 || accel == 0 || mag == 0) {
+    pixel_red();
+  } else if (sys >= 2 && gyro >=2 && accel >=2 && mag >=2) {
+    pixel_green();
+    Serial.print("  [READY]");
+  } else {
+    pixel_orange();
+  }
+
   Serial.println(); 
 }
 
