@@ -5,11 +5,19 @@ Tango Sentio is a 3D Scanner Glove using the Bosch BNO055 Absolute Orientation 9
 From Latin tango: touching, and sentio: seeing.  No we don't speak Latin but we have google and it sounded cool.
 
 ## Hardware
- - Sensor:  [Adafruit 9-DOF Absolute Orientation - BNO055] (https://www.adafruit.com/product/2472)
- - Controller:  [Adafruit Feather M0 Express] (https://www.adafruit.com/product/3403)
+ - Sensor:  [Adafruit 9-DOF Absolute Orientation - BNO055](https://www.adafruit.com/product/2472)
+ - Controller:  [Adafruit Feather M0 Express](https://www.adafruit.com/product/3403)
 ### Tutorials
   - Sensor:  https://learn.adafruit.com/adafruit-bno055-absolute-orientation-sensor
   - Controller:  https://learn.adafruit.com/adafruit-feather-m0-express-designed-for-circuit-python-circuitpython
+
+## Device
+The device straps to your middle finger
+
+### Button 1
+Button 1 is on the left and
+
+### Button 2
 
 ## Client
 The client runs on the micro controller to handle button events and communicate
