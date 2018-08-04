@@ -1,5 +1,8 @@
-# tango
-Tango is a 3D Scanner Glove using the Bosch BNO055 Absolute Orientation 9-DOF sensor.
+# Tango Sentio
+Tango Sentio is a 3D Scanner Glove using the Bosch BNO055 Absolute Orientation 9-DOF sensor.
+
+## Name
+From Latin tango: touching, and sentio: seeing.  No we don't speak Latin but we have google and it sounded cool.
 
 ## Software
 Circuit Python 2.3.1
