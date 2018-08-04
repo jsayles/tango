@@ -29,7 +29,7 @@ LED will turn green when this is complete.
 
 ### Steps
 - **Gyroscope:** Leave flat on the table for a couple seconds.
-- **Accelerometer:** Rotate across one axis in 45˚ intervals.
+- **Accelerometer:** Rotate on one axis in 45˚ intervals.
 - **Magnetometer:** Hold vertically up, and then down.
 
 For a more elaborate explanation of calibration you can watch the
