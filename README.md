@@ -37,10 +37,10 @@ steps below to move to RUNNING.
 4. When you are reached the end of your scan path , push button 1 to move back to RUNNING.
 
 ### Run States
- - CALIBRATING: Red
- - RUNNING: Green
- - TRACKING: White
- - RECORDING: Blue
+ - CALIBRATING: Pixel Color = Red
+ - RUNNING: Pixel Color = Green
+ - TRACKING: Pixel Color = White
+ - RECORDING: Pixel Color = Blue
 
 ### Calibration
 The sensor outputs calibration data for the gyroscope, accelerometer,
@@ -55,7 +55,7 @@ LED will turn green when this is complete.
 - **Magnetometer:** Hold vertically up, and then down.
 
 For a more elaborate explanation of calibration you can watch the
-[Bosch Training Video] (https://www.youtube.com/watch?v=Bw0WuAyGsnY). The
+[Bosch Training Video](https://www.youtube.com/watch?v=Bw0WuAyGsnY). The
 configuration is in NDoF_FMC_On mode so the important part is at the end of the
 video.
 
