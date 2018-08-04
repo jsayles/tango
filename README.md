@@ -42,14 +42,13 @@ steps below to move to RUNNING.
  - TRACKING: Pixel Color = White
  - RECORDING: Pixel Color = Blue
 
-### Calibration
+## Calibration
 The sensor outputs calibration data for the gyroscope, accelerometer,
 magnetometer, and the system as a whole in a range of 0 to 3.  When the device
 starts up the LED will be red.  Watch the serial port for the calibration data,
 and move the device through the calibration steps until all values are 3.  The
 LED will turn green when this is complete.
 
-#### Steps
 - **Gyroscope:** Leave flat on the table for a couple seconds.
 - **Accelerometer:** Rotate on one axis in 45˚ intervals.
 - **Magnetometer:** Hold vertically up, and then down.
